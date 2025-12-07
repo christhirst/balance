@@ -181,7 +181,7 @@ impl Depot for MyDepot {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let addr = "[::1]:50051".parse()?;
+    let addr = "[::]:50051".parse()?;
     let depot = MyDepot::new();
 
     tracing::info!("DepotServer listening on {}", addr);

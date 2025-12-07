@@ -1,0 +1,13 @@
+grpcurl -plaintext -d '{"count": 1, "price_per_share": 2.0, "symbol": "AAPL"}' '[::1]:50051'  depot.Depot.SellShares
+
+grpcurl -plaintext -d '{"count": 1, "price_per_share": 2.0, "symbol": "AAPL"}' '[::1]:50051'  depot.Depot.BuyShares
+
+grpcurl -plaintext -d '{"amount": 100.0}' '[::1]:50051'  depot.Depot.Withdraw
+
+grpcurl -plaintext -d '{"amount": 100.0}' '[::1]:50051'  depot.Depot.Deposit
+
+
+
+
+
+
