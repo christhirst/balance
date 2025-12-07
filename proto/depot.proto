@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package depot;
+
+service Depot {
+  rpc Deposit (DepositRequest) returns (TransactionResponse);
+  rpc Withdraw (WithdrawRequest) returns (TransactionResponse);
+  rpc BuyShares (BuyRequest) returns (TransactionResponse);
+  rpc SellShares (SellRequest) returns (TransactionResponse);
+  rpc GetState (Empty) returns (StateResponse);
+}
+
+message Empty {}
+
+message DepositRequest {
+  double amount = 1;
+}
+
+message WithdrawRequest {
+  double amount = 1;
+}
+
+message BuyRequest {
+  int32 count = 1;
+  double price_per_share = 2;
+}
+
+message SellRequest {
+  int32 count = 1;
+  double price_per_share = 2;
+}
+
+message TransactionResponse {
+  bool success = 1;
+  string message = 2;
+  double current_cash = 3;
+  int32 current_shares = 4;
+}
+
+message StateResponse {
+  double cash = 1;
+  int32 shares = 2;
+  repeated string history = 3;
+}
