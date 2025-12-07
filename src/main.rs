@@ -10,10 +10,10 @@ fn main() {
     depot.add_cash(500.0);
     tracing::info!("After deposit: {}", depot.get_state());
 
-    depot.buy_shares(10, 100.0);
+    depot.buy_shares(10, 100.0, "AAPL".to_string());
     tracing::info!("After buying shares: {}", depot.get_state());
 
-    depot.sell_shares(5, 120.0);
+    depot.sell_shares(5, 120.0, "AAPL".to_string());
     tracing::info!("After selling shares: {}", depot.get_state());
 
     depot.take_cash(200.0);
