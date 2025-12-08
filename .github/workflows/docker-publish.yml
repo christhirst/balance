@@ -46,6 +46,10 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      #-name: Security check
+      # run: cargo audit
+      #- name: Test coverage gat
+      #  run: cargo tarpaulin --fail-under 20
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4

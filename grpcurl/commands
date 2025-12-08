@@ -4,8 +4,7 @@ grpcurl -plaintext -d '{"count": 1, "price_per_share": 2.0, "symbol": "AAPL"}' '
 
 grpcurl -plaintext -d '{"amount": 100.0}' '[::1]:50051'  depot.Depot.Withdraw
 
-grpcurl -plaintext -d '{"amount": 100.0}' '[::1]:50051'  depot.Depot.Deposit
-
+grpcurl -plaintext -d '{"amount": 100.0}' 'raynkami-balance-server.sliplane.app:50051'  depot.Depot.Deposit
 
 
 
