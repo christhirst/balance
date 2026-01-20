@@ -43,7 +43,8 @@ impl Depot for MyDepot {
             success: true,
             message: "Deposit created successfully".to_string(),
             current_cash: balance.cash,
-            current_shares: balance.shares.values().map(|s| s.count).sum(),
+            shares_changed: 0,
+            shares_total: balance.shares.values().map(|s| s.count).sum(),
         }))
     }
 
@@ -59,7 +60,8 @@ impl Depot for MyDepot {
             success: true,
             message: "Withdraw successful".to_string(),
             current_cash: balance.cash,
-            current_shares: balance.shares.values().map(|s| s.count).sum(),
+            shares_changed: 0,
+            shares_total: balance.shares.values().map(|s| s.count).sum(),
         }))
     }
 
@@ -96,7 +98,8 @@ impl Depot for MyDepot {
             success,
             message: message.to_string(),
             current_cash: balance.cash,
-            current_shares: total_shares,
+            shares_changed: req.count,
+            shares_total: total_shares,
         }))
     }
 
@@ -132,29 +135,26 @@ impl Depot for MyDepot {
             success,
             message: message.to_string(),
             current_cash: balance.cash,
-            current_shares: total_shares,
+            shares_changed: req.count,
+            shares_total: total_shares,
         }))
     }
 
     async fn get_state(&self, _request: Request<Empty>) -> Result<Response<StateResponse>, Status> {
         let balance = self.balance.lock().unwrap();
-        let history = balance
-            .history
-            .iter()
-            .map(|tx| {
-                format!(
-                    "[{}] {:?}: Cash: {:.2}, Shares: {}, Symbol: {:?}",
-                    tx.timestamp, tx.transaction_type, tx.amount_cash, tx.amount_shares, tx.symbol
-                )
+        let shares = balance
+            .shares
+            .values()
+            .map(|s| depot::ShareDetails {
+                symbol: s.symbol.clone(),
+                count: s.count,
+                price_per_share: s.price_per_share,
             })
             .collect();
 
-        let total_shares: i32 = balance.shares.values().map(|s| s.count).sum();
-
         Ok(Response::new(StateResponse {
             cash: balance.cash,
-            shares: total_shares,
-            history,
+            shares,
         }))
     }
 
@@ -182,7 +182,7 @@ impl Depot for MyDepot {
         request: Request<StockRequest>,
     ) -> Result<Response<depot::ShareBalanceResponse>, Status> {
         let req = request.into_inner();
-        let symbol = req.symbol;
+        let _symbol = req.symbol;
         let balance = self.balance.lock().unwrap();
         let shares = balance
             .shares
@@ -195,6 +195,50 @@ impl Depot for MyDepot {
             .collect();
 
         Ok(Response::new(depot::ShareBalanceResponse { shares }))
+    }
+
+    async fn get_transactions(
+        &self,
+        _request: Request<StockRequest>,
+    ) -> Result<Response<depot::TransactionsList>, Status> {
+        let balance = self.balance.lock().unwrap();
+        let transactions =
+            balance
+                .history
+                .iter()
+                .map(|tx| depot::Transaction {
+                    r#type: match tx.transaction_type {
+                        operations::TransactionType::Deposit => {
+                            depot::transaction::TransactionType::Deposit.into()
+                        }
+                        operations::TransactionType::Withdraw => {
+                            depot::transaction::TransactionType::Withdraw.into()
+                        }
+                        operations::TransactionType::Buy => {
+                            depot::transaction::TransactionType::Buy.into()
+                        }
+                        operations::TransactionType::Sell => {
+                            depot::transaction::TransactionType::Sell.into()
+                        }
+                    },
+                    amount: tx.amount_cash,
+                    cash_difference: match tx.transaction_type {
+                        operations::TransactionType::Deposit
+                        | operations::TransactionType::Sell => tx.amount_cash,
+                        operations::TransactionType::Withdraw
+                        | operations::TransactionType::Buy => -tx.amount_cash,
+                    },
+                    count: tx.amount_shares,
+                    price_per_share: 0.0, // Historical transactions might not store price per share unless we add it to Transaction struct
+                    symbol: tx.symbol.clone().unwrap_or_default(),
+                    timestamp: tx.timestamp.to_rfc3339(),
+                })
+                .collect();
+
+        Ok(Response::new(depot::TransactionsList {
+            cash: balance.cash,
+            transactions,
+        }))
     }
 }
 

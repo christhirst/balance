@@ -30,3 +30,7 @@ GRPC raynkami-balance-server.sliplane.app:50051/Depot/GetGain
 
 GRPC raynkami-balance-server.sliplane.app:50051/Depot/GetShareBalance
 {"symbol": "AAPL"}
+###
+
+GRPC raynkami-balance-server.sliplane.app:50051/Depot/GetTransactions
+{"symbol": "AAPL"}

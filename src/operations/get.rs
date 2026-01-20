@@ -1,6 +1,7 @@
 use super::{Balance, TransactionType};
 
 impl Balance {
+    #[allow(dead_code)]
     pub fn get_state(&self) -> String {
         format!(
             "Cash: {:.2}, Shares: {:?}, Transactions: {}",
@@ -10,6 +11,7 @@ impl Balance {
         )
     }
 
+    #[allow(dead_code)]
     pub fn print_history(&self) {
         tracing::info!("Transaction History:");
         for tx in &self.history {
@@ -24,6 +26,7 @@ impl Balance {
         }
     }
 
+    #[allow(dead_code)]
     pub fn calculate_total_deposited(&self) -> f64 {
         self.history
             .iter()
@@ -32,6 +35,7 @@ impl Balance {
             .sum()
     }
 
+    #[allow(dead_code)]
     pub fn get_share_balance(&self, symbol: &str) -> i32 {
         self.shares.get(symbol).map(|s| s.count).unwrap_or(0)
     }

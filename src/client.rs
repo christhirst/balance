@@ -1,8 +1,6 @@
 use depot::depot_client::DepotClient;
 use depot::{BuyRequest, DepositRequest, Empty, SellRequest, WithdrawRequest};
 
-use crate::depot::StockRequest;
-
 pub mod depot {
     tonic::include_proto!("depot");
 }
@@ -10,7 +8,7 @@ pub mod depot {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
-    let mut client = DepotClient::connect("http://[::1]:50051").await?;
+    let _client = DepotClient::connect("http://[::1]:50051").await?;
 
     /*  tracing::info!("Sending Deposit Request...");
     let response = client.deposit(DepositRequest { amount: 1000.0 }).await?;

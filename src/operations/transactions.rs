@@ -35,6 +35,7 @@ impl Balance {
         });
     }
 
+    #[allow(dead_code)]
     pub fn delete_transaction(&mut self, index: usize) -> Option<Transaction> {
         if index < self.history.len() {
             Some(self.history.remove(index))
