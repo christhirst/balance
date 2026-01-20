@@ -5,28 +5,21 @@ pub mod buy;
 pub mod get;
 pub mod sell;
 pub mod take;
+pub mod transactions;
+
+pub use transactions::{Transaction, TransactionType};
 
 #[derive(Debug, Clone)]
-pub enum TransactionType {
-    Deposit,
-    Withdraw,
-    Buy,
-    Sell,
-}
-
-#[derive(Debug, Clone)]
-pub struct Transaction {
-    pub transaction_type: TransactionType,
-    pub amount_cash: f64,
-    pub amount_shares: i32,
-    pub symbol: Option<String>,
-    pub timestamp: DateTime<Utc>,
+pub struct Stock {
+    pub symbol: String,
+    pub count: i32,
+    pub price_per_share: f64,
 }
 
 #[derive(Debug)]
 pub struct Balance {
     pub cash: f64,
-    pub shares: std::collections::HashMap<String, i32>,
+    pub shares: std::collections::HashMap<String, Stock>,
     pub history: Vec<Transaction>,
 }
 
@@ -37,21 +30,5 @@ impl Balance {
             shares: std::collections::HashMap::new(),
             history: Vec::new(),
         }
-    }
-
-    pub fn add_transaction(
-        &mut self,
-        transaction_type: TransactionType,
-        amount_cash: f64,
-        amount_shares: i32,
-        symbol: Option<String>,
-    ) {
-        self.history.push(Transaction {
-            transaction_type,
-            amount_cash,
-            amount_shares,
-            symbol,
-            timestamp: Utc::now(),
-        });
     }
 }

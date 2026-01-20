@@ -1,6 +1,8 @@
 use depot::depot_client::DepotClient;
 use depot::{BuyRequest, DepositRequest, Empty, SellRequest, WithdrawRequest};
 
+use crate::depot::StockRequest;
+
 pub mod depot {
     tonic::include_proto!("depot");
 }
@@ -10,7 +12,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
     let mut client = DepotClient::connect("http://[::1]:50051").await?;
 
-    tracing::info!("Sending Deposit Request...");
+    /*  tracing::info!("Sending Deposit Request...");
     let response = client.deposit(DepositRequest { amount: 1000.0 }).await?;
     tracing::info!("RESPONSE={:?}", response.into_inner());
 
@@ -43,12 +45,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!("gain={:?}", response.into_inner());
 
     tracing::info!("Getting Share Balance...");
-    let response = client.get_share_balance(Empty {}).await?;
+    let response = client
+        .get_share_balance(StockRequest {
+            symbol: "AAPL".to_string(),
+        })
+        .await?;
     tracing::info!("share_balance={:?}", response.into_inner());
 
     tracing::info!("Getting State...");
     let response = client.get_state(Empty {}).await?;
-    tracing::info!("state={:?}", response.into_inner());
+    tracing::info!("state={:?}", response.into_inner()); */
 
     Ok(())
 }

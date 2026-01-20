@@ -9,10 +9,14 @@ service Depot {
   rpc SellShares (SellRequest) returns (TransactionResponse);
   rpc GetState (Empty) returns (StateResponse);
   rpc GetGain (Empty) returns (GainResponse);
-  rpc GetShareBalance (Empty) returns (ShareBalanceResponse);
+  rpc GetShareBalance (StockRequest) returns (ShareBalanceResponse);
 }
 
 message Empty {}
+
+message StockRequest {
+  string symbol = 1;
+}
 
 message DepositRequest {
   double amount = 1;
@@ -60,6 +64,7 @@ message GainResponse {
 message ShareDetails {
   string symbol = 1;
   int32 count = 2;
+  double price_per_share = 3;
 }
 
 message ShareBalanceResponse {

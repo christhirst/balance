@@ -14,6 +14,8 @@ pub mod depot {
 mod operations;
 use operations::Balance;
 
+use crate::depot::StockRequest;
+
 #[derive(Debug)]
 pub struct MyDepot {
     balance: Arc<Mutex<Balance>>,
@@ -41,7 +43,7 @@ impl Depot for MyDepot {
             success: true,
             message: "Deposit created successfully".to_string(),
             current_cash: balance.cash,
-            current_shares: balance.shares.values().sum(),
+            current_shares: balance.shares.values().map(|s| s.count).sum(),
         }))
     }
 
@@ -57,7 +59,7 @@ impl Depot for MyDepot {
             success: true,
             message: "Withdraw successful".to_string(),
             current_cash: balance.cash,
-            current_shares: balance.shares.values().sum(),
+            current_shares: balance.shares.values().map(|s| s.count).sum(),
         }))
     }
 
@@ -68,9 +70,17 @@ impl Depot for MyDepot {
         let req = request.into_inner();
         let mut balance = self.balance.lock().unwrap();
 
-        let initial_shares_count = *balance.shares.get(&req.symbol).unwrap_or(&0);
+        let initial_shares_count = balance
+            .shares
+            .get(&req.symbol)
+            .map(|s| s.count)
+            .unwrap_or(0);
         balance.buy_shares(req.count, req.price_per_share, req.symbol.clone());
-        let new_shares_count = *balance.shares.get(&req.symbol).unwrap_or(&0);
+        let new_shares_count = balance
+            .shares
+            .get(&req.symbol)
+            .map(|s| s.count)
+            .unwrap_or(0);
 
         let success = new_shares_count > initial_shares_count;
         let message = if success {
@@ -80,7 +90,7 @@ impl Depot for MyDepot {
         };
 
         // Total shares count across all symbols
-        let total_shares: i32 = balance.shares.values().sum();
+        let total_shares: i32 = balance.shares.values().map(|s| s.count).sum();
 
         Ok(Response::new(TransactionResponse {
             success,
@@ -97,9 +107,17 @@ impl Depot for MyDepot {
         let req = request.into_inner();
         let mut balance = self.balance.lock().unwrap();
 
-        let initial_shares_count = *balance.shares.get(&req.symbol).unwrap_or(&0);
+        let initial_shares_count = balance
+            .shares
+            .get(&req.symbol)
+            .map(|s| s.count)
+            .unwrap_or(0);
         balance.sell_shares(req.count, req.price_per_share, req.symbol.clone());
-        let new_shares_count = *balance.shares.get(&req.symbol).unwrap_or(&0);
+        let new_shares_count = balance
+            .shares
+            .get(&req.symbol)
+            .map(|s| s.count)
+            .unwrap_or(0);
 
         let success = new_shares_count < initial_shares_count;
         let message = if success {
@@ -108,7 +126,7 @@ impl Depot for MyDepot {
             "Sell failed (insufficient shares)"
         };
 
-        let total_shares: i32 = balance.shares.values().sum();
+        let total_shares: i32 = balance.shares.values().map(|s| s.count).sum();
 
         Ok(Response::new(TransactionResponse {
             success,
@@ -131,7 +149,7 @@ impl Depot for MyDepot {
             })
             .collect();
 
-        let total_shares: i32 = balance.shares.values().sum();
+        let total_shares: i32 = balance.shares.values().map(|s| s.count).sum();
 
         Ok(Response::new(StateResponse {
             cash: balance.cash,
@@ -161,15 +179,18 @@ impl Depot for MyDepot {
 
     async fn get_share_balance(
         &self,
-        _request: Request<Empty>,
+        request: Request<StockRequest>,
     ) -> Result<Response<depot::ShareBalanceResponse>, Status> {
+        let req = request.into_inner();
+        let symbol = req.symbol;
         let balance = self.balance.lock().unwrap();
         let shares = balance
             .shares
             .iter()
-            .map(|(symbol, count)| depot::ShareDetails {
-                symbol: symbol.clone(),
-                count: *count,
+            .map(|(_symbol, stock)| depot::ShareDetails {
+                symbol: stock.symbol.clone(),
+                count: stock.count,
+                price_per_share: stock.price_per_share,
             })
             .collect();
 

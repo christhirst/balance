@@ -5,7 +5,18 @@ impl Balance {
         let cost = count as f64 * price_per_share;
         if self.cash >= cost {
             self.cash -= cost;
-            *self.shares.entry(symbol.clone()).or_insert(0) += count;
+            let entry = self
+                .shares
+                .entry(symbol.clone())
+                .or_insert(crate::operations::Stock {
+                    symbol: symbol.clone(),
+                    count: 0,
+                    price_per_share: 0.0,
+                });
+            let total_value = entry.count as f64 * entry.price_per_share + cost;
+            entry.count += count;
+            entry.price_per_share = total_value / entry.count as f64;
+
             self.add_transaction(TransactionType::Buy, cost, count, Some(symbol));
         } else {
             tracing::error!("Not enough cash to buy shares");
@@ -22,7 +33,7 @@ mod tests {
         let mut balance = Balance::new(1000.0, 0);
         balance.buy_shares(10, 50.0, "AAPL".to_string());
         assert_eq!(balance.cash, 500.0);
-        assert_eq!(*balance.shares.get("AAPL").unwrap(), 10);
+        assert_eq!(balance.shares.get("AAPL").unwrap().count, 10);
         assert_eq!(balance.history.len(), 1);
         match balance.history[0].transaction_type {
             TransactionType::Buy => {}
