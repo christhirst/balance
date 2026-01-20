@@ -56,8 +56,8 @@ mod tests {
     #[test]
     fn test_calculate_total_deposited() {
         let mut balance = Balance::new(0.0, 0);
-        balance.add_transaction(TransactionType::Deposit, 100.0, 0, None);
-        balance.add_transaction(TransactionType::Deposit, 50.0, 0, None);
+        balance.add_transaction(TransactionType::Deposit, 100.0, 0, 0.0, None);
+        balance.add_transaction(TransactionType::Deposit, 50.0, 0, 0.0, None);
         // This fails because Balance::new doesn't take shares anymore, and add_transaction takes 4 args
         assert_eq!(balance.calculate_total_deposited(), 150.0);
     }

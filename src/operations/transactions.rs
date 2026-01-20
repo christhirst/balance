@@ -15,6 +15,7 @@ pub struct Transaction {
     pub amount_cash: f64,
     pub amount_shares: i32,
     pub symbol: Option<String>,
+    pub price_per_share: f64,
     pub timestamp: DateTime<Utc>,
 }
 
@@ -24,6 +25,7 @@ impl Balance {
         transaction_type: TransactionType,
         amount_cash: f64,
         amount_shares: i32,
+        price_per_share: f64,
         symbol: Option<String>,
     ) {
         self.history.push(Transaction {
@@ -31,6 +33,7 @@ impl Balance {
             amount_cash,
             amount_shares,
             symbol,
+            price_per_share,
             timestamp: Utc::now(),
         });
     }
@@ -55,8 +58,14 @@ mod tests {
         let mut balance = Balance::new(100.0, 0);
 
         // Add a few transactions
-        balance.add_transaction(TransactionType::Deposit, 100.0, 0, None);
-        balance.add_transaction(TransactionType::Buy, 50.0, 1, Some("AAPL".to_string()));
+        balance.add_transaction(TransactionType::Deposit, 100.0, 0, 0.0, None);
+        balance.add_transaction(
+            TransactionType::Buy,
+            50.0,
+            1,
+            50.0,
+            Some("AAPL".to_string()),
+        );
 
         assert_eq!(balance.history.len(), 2);
 

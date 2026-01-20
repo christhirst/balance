@@ -229,7 +229,7 @@ impl Depot for MyDepot {
                         | operations::TransactionType::Buy => -tx.amount_cash,
                     },
                     count: tx.amount_shares,
-                    price_per_share: 0.0, // Historical transactions might not store price per share unless we add it to Transaction struct
+                    price_per_share: tx.price_per_share,
                     symbol: tx.symbol.clone().unwrap_or_default(),
                     timestamp: tx.timestamp.to_rfc3339(),
                 })

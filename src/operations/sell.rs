@@ -10,7 +10,13 @@ impl Balance {
                 if stock.count == 0 {
                     self.shares.remove(&symbol);
                 }
-                self.add_transaction(TransactionType::Sell, earnings, count, Some(symbol));
+                self.add_transaction(
+                    TransactionType::Sell,
+                    earnings,
+                    count,
+                    price_per_share,
+                    Some(symbol),
+                );
             } else {
                 tracing::error!("Not enough shares to sell");
             }

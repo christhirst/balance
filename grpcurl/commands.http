@@ -1,4 +1,11 @@
 proto < ../proto/depot.proto
+
+### BuyShares
+GRPC raynkami-balance-server.sliplane.app:50051/Depot/BuyShares
+{"count": 1, "price_per_share": 2.0, "symbol": "AAPL"}
+###
+
+
 ### SellShares
 GRPC raynkami-balance-server.sliplane.app:50051/Depot/SellShares
 {
@@ -8,9 +15,7 @@ GRPC raynkami-balance-server.sliplane.app:50051/Depot/SellShares
 }
 ###
 
-GRPC raynkami-balance-server.sliplane.app:50051/Depot/BuyShares
-{"count": 1, "price_per_share": 2.0, "symbol": "AAPL"}
-###
+
 
 GRPC raynkami-balance-server.sliplane.app:50051/Depot/Withdraw
 {"amount": 100.0}

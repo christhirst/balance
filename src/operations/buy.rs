@@ -17,7 +17,13 @@ impl Balance {
             entry.count += count;
             entry.price_per_share = total_value / entry.count as f64;
 
-            self.add_transaction(TransactionType::Buy, cost, count, Some(symbol));
+            self.add_transaction(
+                TransactionType::Buy,
+                cost,
+                count,
+                price_per_share,
+                Some(symbol),
+            );
         } else {
             tracing::error!("Not enough cash to buy shares");
         }
