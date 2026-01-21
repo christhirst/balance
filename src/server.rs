@@ -12,6 +12,7 @@ pub mod depot {
 }
 
 mod operations;
+mod types;
 use operations::Balance;
 
 use crate::depot::StockRequest;
@@ -70,20 +71,26 @@ impl Depot for MyDepot {
         request: Request<BuyRequest>,
     ) -> Result<Response<TransactionResponse>, Status> {
         let req = request.into_inner();
+        tracing::info!("Received BuyRequest: {:?}", req);
         let mut balance = self.balance.lock().unwrap();
 
+        // Get initial shares count
         let initial_shares_count = balance
             .shares
             .get(&req.symbol)
             .map(|s| s.count)
             .unwrap_or(0);
+
+        // Buy shares
         balance.buy_shares(req.count, req.price_per_share, req.symbol.clone());
+        // Additional shares
         let new_shares_count = balance
             .shares
             .get(&req.symbol)
             .map(|s| s.count)
             .unwrap_or(0);
 
+        //
         let success = new_shares_count > initial_shares_count;
         let message = if success {
             "Buy successful"
@@ -142,15 +149,7 @@ impl Depot for MyDepot {
 
     async fn get_state(&self, _request: Request<Empty>) -> Result<Response<StateResponse>, Status> {
         let balance = self.balance.lock().unwrap();
-        let shares = balance
-            .shares
-            .values()
-            .map(|s| depot::ShareDetails {
-                symbol: s.symbol.clone(),
-                count: s.count,
-                price_per_share: s.price_per_share,
-            })
-            .collect();
+        let shares = balance.shares.values().map(|s| s.into()).collect();
 
         Ok(Response::new(StateResponse {
             cash: balance.cash,
@@ -187,11 +186,7 @@ impl Depot for MyDepot {
         let shares = balance
             .shares
             .iter()
-            .map(|(_symbol, stock)| depot::ShareDetails {
-                symbol: stock.symbol.clone(),
-                count: stock.count,
-                price_per_share: stock.price_per_share,
-            })
+            .map(|(_symbol, stock)| stock.into())
             .collect();
 
         Ok(Response::new(depot::ShareBalanceResponse { shares }))
@@ -202,38 +197,7 @@ impl Depot for MyDepot {
         _request: Request<StockRequest>,
     ) -> Result<Response<depot::TransactionsList>, Status> {
         let balance = self.balance.lock().unwrap();
-        let transactions =
-            balance
-                .history
-                .iter()
-                .map(|tx| depot::Transaction {
-                    r#type: match tx.transaction_type {
-                        operations::TransactionType::Deposit => {
-                            depot::transaction::TransactionType::Deposit.into()
-                        }
-                        operations::TransactionType::Withdraw => {
-                            depot::transaction::TransactionType::Withdraw.into()
-                        }
-                        operations::TransactionType::Buy => {
-                            depot::transaction::TransactionType::Buy.into()
-                        }
-                        operations::TransactionType::Sell => {
-                            depot::transaction::TransactionType::Sell.into()
-                        }
-                    },
-                    amount: tx.amount_cash,
-                    cash_difference: match tx.transaction_type {
-                        operations::TransactionType::Deposit
-                        | operations::TransactionType::Sell => tx.amount_cash,
-                        operations::TransactionType::Withdraw
-                        | operations::TransactionType::Buy => -tx.amount_cash,
-                    },
-                    count: tx.amount_shares,
-                    price_per_share: tx.price_per_share,
-                    symbol: tx.symbol.clone().unwrap_or_default(),
-                    timestamp: tx.timestamp.to_rfc3339(),
-                })
-                .collect();
+        let transactions = balance.history.iter().map(|tx| tx.into()).collect();
 
         Ok(Response::new(depot::TransactionsList {
             cash: balance.cash,

@@ -16,11 +16,12 @@ impl Balance {
         tracing::info!("Transaction History:");
         for tx in &self.history {
             tracing::info!(
-                "[{}] {:?}: Cash: {:.2}, Shares: {}, Symbol: {:?}",
+                "[{}] {:?}: Cash: {:.2}, Shares: {}, Price: {:.2}, Symbol: {:?}",
                 tx.timestamp,
                 tx.transaction_type,
                 tx.amount_cash,
                 tx.amount_shares,
+                tx.price_per_share,
                 tx.symbol
             );
         }

@@ -2,6 +2,10 @@ use super::{Balance, TransactionType};
 
 impl Balance {
     pub fn buy_shares(&mut self, count: i32, price_per_share: f64, symbol: String) {
+        if price_per_share <= 0.0 {
+            tracing::error!("Price per share must be positive");
+            return;
+        }
         let cost = count as f64 * price_per_share;
         if self.cash >= cost {
             self.cash -= cost;
