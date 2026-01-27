@@ -204,6 +204,42 @@ impl Depot for MyDepot {
             transactions,
         }))
     }
+
+    async fn reset_stock(
+        &self,
+        request: Request<StockRequest>,
+    ) -> Result<Response<StateResponse>, Status> {
+        let req = request.into_inner();
+        let mut balance = self.balance.lock().unwrap();
+
+        if !req.symbol.is_empty() {
+            balance.shares.remove(&req.symbol);
+        }
+
+        let shares = balance.shares.values().map(|s| s.into()).collect();
+
+        Ok(Response::new(StateResponse {
+            cash: balance.cash,
+            shares,
+        }))
+    }
+
+    async fn reset_cash(
+        &self,
+        _request: Request<Empty>,
+    ) -> Result<Response<StateResponse>, Status> {
+        let mut balance = self.balance.lock().unwrap();
+
+        balance.cash = 0.0;
+        balance.history.clear();
+
+        let shares = balance.shares.values().map(|s| s.into()).collect();
+
+        Ok(Response::new(StateResponse {
+            cash: balance.cash,
+            shares,
+        }))
+    }
 }
 
 #[tokio::main]

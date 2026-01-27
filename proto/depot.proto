@@ -11,6 +11,8 @@ service Depot {
   rpc GetGain (Empty) returns (GainResponse);
   rpc GetShareBalance (StockRequest) returns (ShareBalanceResponse);
   rpc GetTransactions (StockRequest) returns (TransactionsList);
+  rpc ResetStock (StockRequest) returns (StateResponse);
+  rpc ResetCash (Empty) returns (StateResponse);
 }
 
 message Empty {}
